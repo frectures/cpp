@@ -1,4 +1,4 @@
-class Account {
+public class Account {
     private int balance;
 
     public Account(int initialBalance) {
@@ -13,9 +13,7 @@ class Account {
         int id = System.identityHashCode(this);
         System.out.println(id + " " + balance);
     }
-}
 
-class Main {
     public static void main(String[] args) {
         Account a = new Account(42);
         Account b = a;

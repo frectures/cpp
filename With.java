@@ -1,4 +1,6 @@
-public class Close {
+import java.io.*;
+
+public class With {
     public static void main(String[] args) {
         try (BufferedReader in = new BufferedReader(new FileReader("readme.txt"));
             BufferedWriter out = new BufferedWriter(new FileWriter("backup.txt"))) {

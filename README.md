@@ -242,43 +242,55 @@ std::string reversed(const std::string& a) {
 ### Java before 7
 
 ```java
-try {
-    BufferedReader in = new BufferedReader(new FileReader("readme.txt"));
-    BufferedWriter out = new BufferedWriter(new FileWriter("backup.txt"));
+import java.io.*;
 
-    String line;
-    while ((line = in.readLine()) != null) {
-        out.write(line);
-        out.newLine();
-        System.out.print('.');
+public class Close {
+    public static void main(String[] args) {
+        try {
+            BufferedReader in = new BufferedReader(new FileReader("readme.txt"));
+            BufferedWriter out = new BufferedWriter(new FileWriter("backup.txt"));
+
+            String line;
+            while ((line = in.readLine()) != null) {
+                out.write(line);
+                out.newLine();
+                System.out.print('.');
+            }
+            System.out.println("done!");
+
+            // Do you see the problem?
+            out.close();
+            in.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
-    System.out.println("done!");
-
-    // Do you see the problem?
-    out.close();
-    in.close();
-} catch (IOException ex) {
-    ex.printStackTrace();
 }
 ```
 
 ### Java 7 and later
 
 ```java
-try (BufferedReader in = new BufferedReader(new FileReader("readme.txt"));
-     BufferedWriter out = new BufferedWriter(new FileWriter("backup.txt"))) {
+import java.io.*;
 
-    String line;
-    while ((line = in.readLine()) != null) {
-        out.write(line);
-        out.newLine();
-        System.out.print('.');
+public class With {
+    public static void main(String[] args) {
+        try (BufferedReader in = new BufferedReader(new FileReader("readme.txt"));
+            BufferedWriter out = new BufferedWriter(new FileWriter("backup.txt"))) {
+
+            String line;
+            while ((line = in.readLine()) != null) {
+                out.write(line);
+                out.newLine();
+                System.out.print('.');
+            }
+            System.out.println("done!");
+
+            // Readers are closed automatically
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
-    System.out.println("done!");
-
-    // Readers are closed automatically
-} catch (IOException ex) {
-    ex.printStackTrace();
 }
 ```
 
@@ -299,9 +311,9 @@ int main() {
     }
     std::cout << "done!\n";
 
-    // line is destructed
-    // out is destructed
-    // in is destructed
+    // line destructor releases dynamic char array
+    // out destructor closes backup.txt
+    // in destructor closes readme.txt
 }
 ```
 
@@ -347,8 +359,9 @@ int main() {
 
 ```c++
 #include <iostream>
-#include <stdio.h>
 #include <string>
+
+#include <stdio.h>
 
 class File {
     std::string name;
@@ -368,20 +381,16 @@ public:
     }
 };
 
-void backup() {
-    File in("readme.txt", "r");
-    File out("backup.txt", "w");
-
-    char line[1000000];
-    while (fgets(line, sizeof line, in.file) && fputs(line, out.file) != EOF) {
-        putchar('.');
-    }
-    puts("done!");
-}
-
 int main() {
     try {
-        backup();
+        File in("readme.txt", "r");
+        File out("backup.txt", "w");
+
+        char line[1000000];
+        while (fgets(line, sizeof line, in.file) && fputs(line, out.file) != EOF) {
+            putchar('.');
+        }
+        puts("done!");
     } catch (std::exception& ex) {
         std::cout << ex.what() << "\n";
         return EXIT_FAILURE;
@@ -402,10 +411,9 @@ int main() {
 
     // Move constructor
     // File a = File("readme.txt", "r");
-    File(File&& that) {
+    File(File&& that) : name(std::move(that.name)) {
         file = that.file;
         that.file = nullptr;
-        name = std::move(that.name);
     }
 
     // Move assignment operator
@@ -417,9 +425,9 @@ int main() {
                 fclose(file);
             }
 
+            name = std::move(that.name);
             file = that.file;
             that.file = nullptr;
-            name = std::move(that.name);
         }
         return *this;
     }
@@ -439,8 +447,8 @@ int main() {
     // File& operator=(const File&)
     // File& operator=(File&& that)
     File& operator=(File that) {
-        std::swap(file, that.file);
         name.swap(that.name);
+        std::swap(file, that.file);
         return *this;
     }
 ```
@@ -543,7 +551,7 @@ bool operator==(const Postleitgebiet& a, const Postleitgebiet& b) {
 // for use in associative containers
 bool operator<(const Postleitgebiet& a, const Postleitgebiet& b) {
     if (a.getPostleitzahl() < b.getPostleitzahl()) return true;
-    if (a.getPostleitzahl() > b.getPostleitzahl()) return false;
+    if (b.getPostleitzahl() < a.getPostleitzahl()) return false;
     return a.getStadt() < b.getStadt();
 }
 
@@ -565,9 +573,9 @@ namespace std {
 
 - Containers
   - Sequence containers: `array`, `vector`, `deque`, `list`, `forward_list`
-  - Associative containers: `set`, `map`, `multiset`, `multimap`,
+  - Associative containers: `set`, `map`, `multiset`, `multimap`
   - Unordered associative containers: `unordered_set`, `unordered_map`, `unordered_multiset`, `unordered_multimap`
-  - Container adaptors: `stack`, `queue`, `priority_queue`,
+  - Container adaptors: `stack`, `queue`, `priority_queue`
 - Iterators
 - Algorithms
   - Non-modifying: `all_of`, `any_of`, `none_of`, `for_each`, `for_each_n`, `count`, `count_if`, `mismatch`, `find`, `find_if`, `find_if_not`, `find_end`, `find_first_of`, `adjacent_find`, `search`, `search_n`
@@ -627,17 +635,17 @@ int main() {
     std::unordered_map<std::string, int> m {{"one", 1}, {"two", 2}, {"three", 3}, {"four", 4}};
     m.emplace("five", 5);
 
-    for (const auto& p : m) {
-        std::cout << p.first << " -> " << p.second << "\n";
+    for (const std::pair<const std::string, int>& p : m) {
+        std::cout << p.first << ": " << p.second << "\n";
     }
 
     for (const auto& [word, number] : m) {
-        std::cout << word << " -> " << number << "\n";
+        std::cout << word << ": " << number << "\n";
     }
 
     auto it = m.find("tree");
     if (it != m.end()) {
-        std::cout << it->first << " -> " << it->second << "\n";
+        std::cout << it->first << ": " << it->second << "\n";
     } else {
         std::cout << "not found\n";
     }
@@ -656,7 +664,7 @@ bool stringLengthLess(const std::string& a, const std::string& b) {
 }
 
 struct StringLengthLess {
-    bool operator()(const std::string& a, const std::string& b) {
+    bool operator()(const std::string& a, const std::string& b) const {
         return a.length() < b.length();
     }
 };
