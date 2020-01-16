@@ -399,6 +399,20 @@ int main() {
 
 ### Special member functions
 
+Move constructor
+
+![](img/movecon1.svg)
+
+![](img/movecon2.svg)
+
+Move assignment operator
+
+![](img/moveass1.svg)
+
+![](img/moveass2.svg)
+
+![](img/moveass3.svg)
+
 ```c++
     // Copy constructor
     // File a = b;
@@ -439,7 +453,15 @@ int main() {
     }
 ```
 
-### Copy-and-swap/Move-and-swap idiom
+### Copy/Move and swap idiom
+
+![](img/swap1.svg)
+
+![](img/swap2.svg)
+
+![](img/swap3.svg)
+
+![](img/swap4.svg)
 
 ```c++
     // File& operator=(const File&)
