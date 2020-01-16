@@ -364,19 +364,18 @@ int main() {
 #include <stdio.h>
 
 class File {
-    std::string name;
 public:
     FILE* file;
 
-    File(const char* filename, const char* mode) : name(filename) {
+    File(const char* filename, const char* mode) {
         file = fopen(filename, mode);
         if (!file) throw std::ios_base::failure(filename);
-        std::cout << "opened " << name << "\n";
+        std::cout << "fopen " << file << " " << filename << "\n";
     }
 
     // Destructor
     ~File() {
-        std::cout << "closing " << name << "\n";
+        std::cout << "fclose " << file << "\n";
         fclose(file);
     }
 };
@@ -411,7 +410,7 @@ int main() {
 
     // Move constructor
     // File a = File("readme.txt", "r");
-    File(File&& that) : name(std::move(that.name)) {
+    File(File&& that) {
         file = that.file;
         that.file = nullptr;
     }
@@ -421,11 +420,10 @@ int main() {
     File& operator=(File&& that) {
         if (this != &that) {
             if (file) {
-                std::cout << "closing " << name << "\n";
+                std::cout << "fclose " << file << "\n";
                 fclose(file);
             }
 
-            name = std::move(that.name);
             file = that.file;
             that.file = nullptr;
         }
@@ -435,7 +433,7 @@ int main() {
     // Destructor
     ~File() {
         if (file) {
-            std::cout << "closing " << name << "\n";
+            std::cout << "fclose " << file << "\n";
             fclose(file);
         }
     }
@@ -447,7 +445,6 @@ int main() {
     // File& operator=(const File&)
     // File& operator=(File&& that)
     File& operator=(File that) {
-        name.swap(that.name);
         std::swap(file, that.file);
         return *this;
     }
