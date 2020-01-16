@@ -688,12 +688,12 @@ int main() {
 
 ### How thick is Moby Dick?
 
-- http://www.gutenberg.org/files/2489
-- What are the 10 most frequently used words in Herman Melville's novel "Moby Dick"?
-- The following standard library algorithms could be useful:
-  - `std::transform` with `tolower`
-  - `std::find_if` and `std::find_if_not` with `isalpha`
-  - `std::partial_sort` with lambda
+> - http://www.gutenberg.org/files/2489
+> - What are the 10 most frequently used words in Herman Melville's novel "Moby Dick"?
+> - The following standard library algorithms could be useful:
+>   - `std::transform` with `tolower`
+>   - `std::find_if` and `std::find_if_not` with `isalpha`
+>   - `std::partial_sort` with lambda
 
 ## Inheritance
 
