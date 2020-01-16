@@ -187,6 +187,10 @@ public class Pass
 
 ### C++ supports multiple parameter passing mechanisms
 
+> **Side note:** String literals with n characters have static storage duration and are of type `const char[n+1]` (+1 for the terminating NUL character), which have an implicit conversion to `const char*`, which has an implicit conversion to `std::string`.
+
+![](img/string.svg)
+
 ```c++
 #include <iostream>
 #include <string>
@@ -205,10 +209,6 @@ int main() {
     std::cout << s << " " << t << "\n";
 }
 ```
-
-> **Side note:** String literals with n characters have static storage duration and are of type `const char[n+1]` (+1 for the terminating NUL character), which have an implicit conversion to `const char*`, which has an implicit conversion to `std::string`.
-
-![](img/string.svg)
 
 | Pass by...         | Parameter type       | `f(variable)` | `f(constant)` | `f(value)` |
 | ------------------ | -------------------- | :-----------: | :-----------: | :--------: |
