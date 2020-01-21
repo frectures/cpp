@@ -653,6 +653,7 @@ int main() {
 int main() {
     std::unordered_map<std::string, int> m {{"one", 1}, {"two", 2}, {"three", 3}, {"four", 4}};
     m.emplace("five", 5);
+    m["six"] = 6; // std::unordered_map::operator[] locates existing value or inserts default value
 
     for (const std::pair<const std::string, int>& p : m) {
         std::cout << p.first << ": " << p.second << "\n";
@@ -668,6 +669,11 @@ int main() {
     } else {
         std::cout << "not found\n";
     }
+
+    std::cout << m["five"]  << "\n"; // 5
+    std::cout << m["six"]   << "\n"; // 6
+    std::cout << m["seven"] << "\n"; // 0 (!)
+    std::cout << m.size()   << "\n"; // 7 (!)
 }
 ```
 
