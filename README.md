@@ -399,13 +399,25 @@ int main() {
 
 ### Special member functions
 
-Move constructor
+Auto-generated copy constructor causes double-release in destructor:
+
+![](img/copycon1.svg)
+
+![](img/copycon2.svg)
+
+Auto-generated copy assignment operator leaks old resource and causes double-release in destructor:
+
+![](img/copyass1.svg)
+
+![](img/copyass2.svg)
+
+Custom move constructor should transfer ownership:
 
 ![](img/movecon1.svg)
 
 ![](img/movecon2.svg)
 
-Move assignment operator
+Custom move assignment operator should release old resource and transfer ownership:
 
 ![](img/moveass1.svg)
 
