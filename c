@@ -4,5 +4,4 @@ if [ -z $1 ]
 then
     program=$(ls *.cpp -1 -t | head -n1)
 fi
-echo Compile and run $program...
-g++ -std=c++17 $program && ./a.out
+g++ -std=c++14 -fno-elide-constructors $program && ./a.out
