@@ -245,22 +245,26 @@ std::string reversed(const std::string& a) {
 import java.io.*;
 
 public class Close {
+    private static void backup() throws IOException {
+        BufferedReader in = new BufferedReader(new FileReader("readme.txt"));
+        BufferedWriter out = new BufferedWriter(new FileWriter("backup.txt"));
+
+        String line;
+        while ((line = in.readLine()) != null) {
+            out.write(line);
+            out.newLine();
+            System.out.print('.');
+        }
+        System.out.println("done!");
+
+        // Do you see the problem?
+        out.close();
+        in.close();
+    }
+
     public static void main(String[] args) {
         try {
-            BufferedReader in = new BufferedReader(new FileReader("readme.txt"));
-            BufferedWriter out = new BufferedWriter(new FileWriter("backup.txt"));
-
-            String line;
-            while ((line = in.readLine()) != null) {
-                out.write(line);
-                out.newLine();
-                System.out.print('.');
-            }
-            System.out.println("done!");
-
-            // Do you see the problem?
-            out.close();
-            in.close();
+            backup();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -274,7 +278,7 @@ public class Close {
 import java.io.*;
 
 public class With {
-    public static void main(String[] args) {
+    private static void backup() throws IOException {
         try (BufferedReader in = new BufferedReader(new FileReader("readme.txt"));
             BufferedWriter out = new BufferedWriter(new FileWriter("backup.txt"))) {
 
@@ -286,7 +290,13 @@ public class With {
             }
             System.out.println("done!");
 
-            // Readers are closed automatically
+            // Files are closed automatically
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            backup();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -301,7 +311,7 @@ public class With {
 #include <iostream>
 #include <string>
 
-int main() {
+void backup() {
     std::ifstream in("readme.txt");
     std::ofstream out("backup.txt");
 
@@ -311,9 +321,16 @@ int main() {
     }
     std::cout << "done!\n";
 
-    // line destructor releases dynamic char array
     // out destructor closes backup.txt
     // in destructor closes readme.txt
+}
+
+int main() {
+    try {
+        backup();
+    } catch (std::exception& ex) {
+        std::cout << ex.what() << "\n";
+    }
 }
 ```
 
@@ -337,7 +354,7 @@ int main() {
 ```c
 #include <stdio.h>
 
-int main() {
+void backup() {
     FILE* in = fopen("readme.txt", "r");
     if (in) {
         FILE* out = fopen("backup.txt", "w");
@@ -353,46 +370,52 @@ int main() {
         fclose(in);
     }
 }
+
+int main() {
+    backup();
+}
 ```
 
 ### RAII
 
 ```c++
-#include <iostream>
-#include <string>
-
+#include <ios>
 #include <stdio.h>
 
-class File {
+class Raiile {
 public:
-    FILE* file;
+    FILE* handle;
 
-    File(const char* filename, const char* mode) {
-        file = fopen(filename, mode);
-        if (!file) throw std::ios_base::failure(filename);
-        std::cout << "fopen " << file << " " << filename << "\n";
+    // Constructor
+    Raiile(const char* filename, const char* mode) {
+        handle = fopen(filename, mode);
+        if (!handle) throw std::ios_base::failure(filename);
+        printf("fopen %p %s\n", handle, filename);
     }
 
     // Destructor
-    ~File() {
-        std::cout << "fclose " << file << "\n";
-        fclose(file);
+    ~Raiile() {
+        printf("fclose %p\n", handle);
+        fclose(handle);
     }
 };
 
+void backup() {
+    Raiile in("readme.txt", "r");
+    Raiile out("backup.txt", "w");
+
+    char line[1000000];
+    while (fgets(line, sizeof line, in.handle) && fputs(line, out.handle) != EOF) {
+        putchar('.');
+    }
+    puts("done!");
+}
+
 int main() {
     try {
-        File in("readme.txt", "r");
-        File out("backup.txt", "w");
-
-        char line[1000000];
-        while (fgets(line, sizeof line, in.file) && fputs(line, out.file) != EOF) {
-            putchar('.');
-        }
-        puts("done!");
+        backup();
     } catch (std::exception& ex) {
-        std::cout << ex.what() << "\n";
-        return EXIT_FAILURE;
+        puts(ex.what());
     }
 }
 ```
@@ -427,40 +450,40 @@ Custom move assignment operator should release old resource and transfer ownersh
 
 ```c++
     // Copy constructor
-    // File a = b;
-    File(const File&) = delete;
+    // Raiile a = b;
+    Raiile(const Raiile&) = delete;
 
-    // Assignment operator
+    // Copy assignment operator
     // a = b;
-    File& operator=(const File&) = delete;
+    Raiile& operator=(const Raiile&) = delete;
 
     // Move constructor
-    // File a = File("readme.txt", "r");
-    File(File&& that) {
-        file = that.file;
-        that.file = nullptr;
+    // Raiile a = Raiile("another.txt", "r");
+    Raiile(Raiile&& that) {
+        handle = that.handle;
+        that.handle = nullptr;
     }
 
     // Move assignment operator
-    // a = File("readme.txt", "r");
-    File& operator=(File&& that) {
+    // a = Raiile("another.txt", "r");
+    Raiile& operator=(Raiile&& that) {
         if (this != &that) {
-            if (file) {
-                std::cout << "fclose " << file << "\n";
-                fclose(file);
+            if (handle) {
+                printf("fclose %p\n", handle);
+                fclose(handle);
             }
 
-            file = that.file;
-            that.file = nullptr;
+            handle = that.handle;
+            that.handle = nullptr;
         }
         return *this;
     }
 
     // Destructor
-    ~File() {
-        if (file) {
-            std::cout << "fclose " << file << "\n";
-            fclose(file);
+    ~Raiile() {
+        if (handle) {
+            printf("fclose %p\n", handle);
+            fclose(handle);
         }
     }
 ```
@@ -476,10 +499,10 @@ Custom move assignment operator should release old resource and transfer ownersh
 ![](img/swap4.svg)
 
 ```c++
-    // File& operator=(const File&)
-    // File& operator=(File&& that)
-    File& operator=(File that) {
-        std::swap(file, that.file);
+    // Raiile& operator=(const Raiile&)
+    // Raiile& operator=(Raiile&& that)
+    Raiile& operator=(Raiile that) {
+        std::swap(handle, that.handle);
         return *this;
     }
 ```

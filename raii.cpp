@@ -1,6 +1,7 @@
+#include <ios>
 #include <stdio.h>
 
-int main() {
+void backup() {
     FILE* in = fopen("readme.txt", "r");
     if (in) {
         FILE* out = fopen("backup.txt", "w");
@@ -14,5 +15,13 @@ int main() {
             fclose(out);
         }
         fclose(in);
+    }
+}
+
+int main() {
+    try {
+        backup();
+    } catch (std::exception& ex) {
+        puts(ex.what());
     }
 }

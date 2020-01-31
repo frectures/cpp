@@ -1,7 +1,7 @@
 import java.io.*;
 
 public class With {
-    public static void main(String[] args) {
+    private static void backup() throws IOException {
         try (BufferedReader in = new BufferedReader(new FileReader("readme.txt"));
             BufferedWriter out = new BufferedWriter(new FileWriter("backup.txt"))) {
 
@@ -13,7 +13,13 @@ public class With {
             }
             System.out.println("done!");
 
-            // Readers are closed automatically
+            // Files are closed automatically
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            backup();
         } catch (IOException ex) {
             ex.printStackTrace();
         }

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-int main() {
+void backup() {
     std::ifstream in("readme.txt");
     std::ofstream out("backup.txt");
 
@@ -12,7 +12,14 @@ int main() {
     }
     std::cout << "done!\n";
 
-    // line destructor releases dynamic char array
     // out destructor closes backup.txt
     // in destructor closes readme.txt
+}
+
+int main() {
+    try {
+        backup();
+    } catch (std::exception& ex) {
+        std::cout << ex.what() << "\n";
+    }
 }
