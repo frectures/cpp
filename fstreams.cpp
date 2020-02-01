@@ -7,7 +7,9 @@ void backup() {
     std::ofstream out("backup.txt");
 
     std::string line;
-    while (std::getline(in, line) && (out << line << "\n")) {
+    while (std::getline(in, line)
+        && out << line << "\n")
+    {
         std::cout << '.';
     }
     std::cout << "done!\n";

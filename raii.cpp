@@ -1,5 +1,6 @@
-#include <ios>
 #include <stdio.h>
+#include <ios>
+using ioex = std::ios_base::failure;
 
 void backup() {
     FILE* in = fopen("readme.txt", "r");
@@ -7,7 +8,9 @@ void backup() {
         FILE* out = fopen("backup.txt", "w");
         if (out) {
             char line[1000000];
-            while (fgets(line, sizeof line, in) && fputs(line, out) != EOF) {
+            while (fgets(line, sizeof line, in)
+                && fputs(line, out) != EOF)
+            {
                 putchar('.');
             }
             puts("done!");
