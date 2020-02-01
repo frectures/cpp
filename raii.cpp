@@ -4,21 +4,25 @@ using ioex = std::ios_base::failure;
 
 void backup() {
     FILE* in = fopen("readme.txt", "r");
-    if (in) {
-        FILE* out = fopen("backup.txt", "w");
-        if (out) {
-            char line[1000000];
-            while (fgets(line, sizeof line, in)
-                && fputs(line, out) != EOF)
-            {
-                putchar('.');
-            }
-            puts("done!");
+    if (!in) goto close0;
 
-            fclose(out);
-        }
-        fclose(in);
+    FILE* out = fopen("backup.txt", "w");
+    if (!out) goto close1;
+
+    char line[1000000];
+    while (fgets(line, sizeof line, in)
+        && fputs(line, out) != EOF)
+    {
+        putchar('.');
     }
+    puts("done!");
+
+close2:
+    fclose(out);
+close1:
+    fclose(in);
+close0:
+    ;
 }
 
 int main() {
