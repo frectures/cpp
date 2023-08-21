@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <ios>
-using ioex = std::ios_base::failure;
 
 void backup() {
     FILE* in = fopen("readme.txt", "r");
@@ -26,9 +24,5 @@ close0:
 }
 
 int main() {
-    try {
-        backup();
-    } catch (std::exception& ex) {
-        puts(ex.what());
-    }
+    backup();
 }

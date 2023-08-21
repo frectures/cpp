@@ -414,8 +414,8 @@ void backup() {
     Raiile out("backup.txt", "w");
 
     char line[1000000];
-    while (fgets(line, sizeof line, in)
-        && fputs(line, out) != EOF)
+    while (fgets(line, sizeof line, in.handle)
+        && fputs(line, out.handle) != EOF)
     {
         putchar('.');
     }
