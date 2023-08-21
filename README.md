@@ -340,7 +340,6 @@ int main() {
 | Member `obj.m`         | before `obj` constructor | after `obj` destructor         | `obj`'s          |
 | `static` member        | before `main`            | after `main`                   | static           |
 | Temporary              | evaluation               | end of full-expression         | automatic        |
-| Heap<sup>1</sup>       | `malloc`                 | `free`                         | dynamic          |
 | Free store<sup>1</sup> | `new`                    | `delete`                       | dynamic          |
 | One owner              | `std::make_unique`       | during owner's destructor      | dynamic          |
 | Multiple owners        | `std::make_shared`       | during last owner's destructor | dynamic          |
